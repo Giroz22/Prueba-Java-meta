@@ -175,7 +175,19 @@ public class CompraController extends BaseController<Compra>{
         }
     }
 
-  
+    @Override
+    public String getAll(List<Compra> listCompras) {
+        String strListObj =  "";
+
+        for( Compra objCompra: listCompras){
+            Cliente objCliente = ClienteController.objClienteModel.findById(objCompra.getId_cliente());
+            Producto objProducto = ProductoController.objProductoModel.findById(objCompra.getId_producto());
+
+            strListObj += objCompra.toString(objCliente,objProducto);
+        }
+
+        return strListObj;
+    }
 
     private boolean realizarCompra(int cantidad, int idProducto){
         //Traemos el producto actual

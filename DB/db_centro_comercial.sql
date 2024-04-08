@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS db_centro_comercial;
+DROP DATABASE IF EXISTS 	;
 CREATE DATABASE IF NOT EXISTS db_centro_comercial;
 USE db_centro_comercial;
 
