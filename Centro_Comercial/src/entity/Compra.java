@@ -88,4 +88,14 @@ public class Compra {
                 ", cantidad=" + cantidad +
                 '}';
     }
+
+    public String toString(Cliente objCliente, Producto objProducto) {
+        return "Compra{" +
+                "id=" + id +
+                ", cliente=" + objCliente +
+                ", producto=" + objProducto +
+                ", fecha_compra=" + fecha_compra +
+                ", cantidad=" + cantidad +
+                '}';
+    }
 }

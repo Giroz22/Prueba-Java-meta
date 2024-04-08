@@ -126,6 +126,57 @@ public class CompraController extends BaseController<Compra>{
         generarFactura(objCompraDB ,objProducto, objTienda, objCliente);
     }
 
+    @Override
+    public void update() {
+        try {
+            // Obtenemos la info tanto del objeto nuevo como del antiguo
+            Compra objOld = this.selectObject();
+            if (objOld == null) return;
+
+            //Pedimos la información
+            Compra objUpdated = this.requestData(objOld.getId(), objOld);
+            if (objUpdated == null) return;
+
+            //Validamos si los objetos tiene la misma información
+            if(objOld.equals(objUpdated)){
+                JOptionPane.showMessageDialog(null, "La información ingresada es igual a la existente");
+                return;
+            }
+
+            //Mostramos el mensaje de confirmación
+            int isSure = JOptionPane.showConfirmDialog(null, "Esta seguro de actualizar?\n"
+                    + "Old:\n" + objOld.toString() + "\n"
+                    + "New:\n" + objUpdated.toString());
+
+            if (isSure == 0) {
+
+                //Se realiza la compra
+                int newCantidad = objUpdated.getCantidad() - objOld.getCantidad();
+                if(!realizarCompra(newCantidad, objUpdated.getId_producto())) return;
+
+                //Actualizamos el objeto
+                Compra objCompraDB = CompraController.objCompraModel.update(objUpdated);
+
+                if(objCompraDB == null) return;
+
+                JOptionPane.showMessageDialog(null, "Se actualizo correctamente!!");
+
+                Producto objProducto = ProductoController.objProductoModel.findById(objCompraDB.getId_producto());
+                Tienda objTienda = TiendaController.objTiendaModel.findById(objProducto.getId_tienda());
+                Cliente objCliente = ClienteController.objClienteModel.findById(objCompraDB.getId_cliente());
+
+                generarFactura(objCompraDB ,objProducto, objTienda, objCliente);
+
+            } else {
+                JOptionPane.showMessageDialog(null, "Actualización cancelada");
+            }
+        }catch (Exception e){
+            JOptionPane.showMessageDialog(null, "Error al actualizar " + e.getMessage());
+        }
+    }
+
+  
+
     private boolean realizarCompra(int cantidad, int idProducto){
         //Traemos el producto actual
         Producto objProducto = ProductoController.objProductoModel.findById(idProducto);
@@ -156,7 +207,8 @@ public class CompraController extends BaseController<Compra>{
         JOptionPane.showMessageDialog(null,
                 "===== Factura de Compra =====\n" +
                         "Producto: " + objProducto.getNombre() + "\n" +
-                        "Precio: " + objProducto.getPrecio() +
+                        "Precio: " + objProducto.getPrecio() + "\n" +
+                        "Cantidad: " + objCompra.getCantidad() +
                         "\n\n" +
                         "Tienda: " +  objTienda.getNombre() + "\n" +
                         "Ubicación: " + objTienda.getUbicacion() +
@@ -165,7 +217,7 @@ public class CompraController extends BaseController<Compra>{
                         "Email: " + objCliente.getEmail() +
                         "\n\n" +
                         "Precio base: " + objProducto.getPrecio() + "\n" +
-                        "Precio total: " + precioTotal +
+                        "Precio total: " + precioTotal + "\n"  +
                         "Precio total IVA: " + precioTotalIVA
                 );
     }
