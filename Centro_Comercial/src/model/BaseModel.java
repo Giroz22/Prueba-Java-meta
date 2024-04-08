@@ -1,14 +1,15 @@
 package model;
 
+import com.mysql.cj.jdbc.MysqlDataSource;
+import com.mysql.cj.jdbc.exceptions.MysqlDataTruncation;
+import com.mysql.cj.result.BigDecimalValueFactory;
 import config.ConfigDB;
 
 import javax.swing.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.math.BigDecimal;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +51,7 @@ public abstract class BaseModel<T> implements CRUD<T> {
             }
 
         }catch (SQLException e){
-            JOptionPane.showMessageDialog(null, "Error find all data" + e.getMessage() );
+            System.err.println("Error al buscar todos los datos\n" + e.getMessage() );
         }
 
         ConfigDB.closeConnection();
@@ -81,10 +82,10 @@ public abstract class BaseModel<T> implements CRUD<T> {
 
             // Validamos si se encontraron datos con esa id
             if(objDB == null){
-                JOptionPane.showMessageDialog(null, "Not found data with that id");
+                JOptionPane.showMessageDialog(null, "No se encontró información con ese id");
             }
         }catch (SQLException e){
-            System.err.println("Error find by id");
+            System.err.println("Error al buscar por id\n" + e.getMessage());
         }
 
         ConfigDB.closeConnection();
@@ -122,7 +123,7 @@ public abstract class BaseModel<T> implements CRUD<T> {
             objPreparedStatement.execute();
             ResultSet objResult = objPreparedStatement.getGeneratedKeys();
 
-            if(!objResult.next()) throw new SQLException("It wasn't posible to save");
+            if(!objResult.next()) throw new SQLException("No es posible guardar la información");
 
             // Obtenemos el objeto guardado en la BD
             newObj = this.findById(objResult.getInt(1));
@@ -168,7 +169,7 @@ public abstract class BaseModel<T> implements CRUD<T> {
             objPreparedStatement.executeUpdate();
 
         }catch (Exception e){
-            JOptionPane.showMessageDialog(null,"Error to save in class BaseModel\n"+e.getMessage());
+            System.err.println("Error al guardar la información\n"+e.getMessage());
         }
 
         ConfigDB.closeConnection();
@@ -193,12 +194,12 @@ public abstract class BaseModel<T> implements CRUD<T> {
 
             // Validamos si se afecto la tabla
             if(rowsAffected <= 0){
-                JOptionPane.showMessageDialog(null, "Not found data with that id");
+                JOptionPane.showMessageDialog(null, "No se encontró información con ese id");
             }else {
                 isDeleted = true;
             }
         }catch (SQLException e){
-            System.err.println("Error delete class base modal\n" + e.getMessage());
+            System.err.println("Error al eliminar\n" + e.getMessage());
         }
 
         ConfigDB.closeConnection();
@@ -224,21 +225,32 @@ public abstract class BaseModel<T> implements CRUD<T> {
                 //Obtenemos el atributo
                 Field attribute = listAttributes[i];
 
+                //Obtenemos el valor del atributo desde la DB
+                Object valueAttribute = objResult.getObject(attribute.getName());  // getObject(i + 1);
+
                 //Creamos el método set del objeto
                 String nameMethodSet = getNameMethodSet(attribute);
                 Class<?> typeAttribute = attribute.getType();
                 Method methodSet = this.entityClass.getDeclaredMethod(nameMethodSet, typeAttribute);
 
-                //Obtenemos el valor del atributo desde la DB
-                Object valueAttribute = objResult.getObject(i + 1);
+
+                //Validamos si el valor es bigDecimal
+                if(valueAttribute.getClass() == BigDecimal.class){
+                    methodSet = this.entityClass.getDeclaredMethod(nameMethodSet, BigDecimal.class);
+                }
+
+                //Validamos si el valor es de tipo Timestamp
+                if(valueAttribute.getClass() == Timestamp.class){
+                    methodSet = this.entityClass.getDeclaredMethod(nameMethodSet, Timestamp.class);
+                }
 
                 //Asignamos un valor al atributo
                 methodSet.invoke(obj, valueAttribute);
             }
         }catch (NoSuchMethodException e){
-                System.out.println("Method not found\n" + e.getMessage());
+                System.err.println("No se encontró el método\n" + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Error get info\n" + e);
+            System.err.println("Error al obtener la información del objeto\n" + e.getMessage());
         }
 
         return obj;

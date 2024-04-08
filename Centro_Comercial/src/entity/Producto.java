@@ -1,5 +1,7 @@
 package entity;
 
+import java.math.BigDecimal;
+
 public class Producto {
     //Atributos
     private int id;
@@ -45,6 +47,10 @@ public class Producto {
 
     public void setPrecio(double precio) {
         this.precio = precio;
+    }
+
+    public void setPrecio(BigDecimal precio) {
+        this.precio = precio.doubleValue();
     }
 
     public int getId_tienda() {

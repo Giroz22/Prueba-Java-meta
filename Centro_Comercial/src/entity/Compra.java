@@ -1,24 +1,33 @@
 package entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDate;
 
 public class Compra {
     //Atributos
     private int id;
     private int id_cliente;
     private int id_producto;
-    private Date fecha_compra;
+    private LocalDate fecha_compra;
     private int cantidad;
     //Constructores
 
     public Compra() {
     }
 
-    public Compra(int id, int id_cliente, int id_producto, Date fecha_compra, int cantidad) {
+    public Compra(int id, int id_cliente, int id_producto, LocalDate fecha_compra, int cantidad) {
         this.id = id;
         this.id_cliente = id_cliente;
         this.id_producto = id_producto;
         this.fecha_compra = fecha_compra;
+        this.cantidad = cantidad;
+    }
+
+    public Compra(int id, int id_cliente, int id_producto, int cantidad) {
+        this.id = id;
+        this.id_cliente = id_cliente;
+        this.id_producto = id_producto;
+        this.fecha_compra = null;
         this.cantidad = cantidad;
     }
     //Getters y Setters
@@ -47,12 +56,16 @@ public class Compra {
         this.id_producto = id_producto;
     }
 
-    public Date getFecha_compra() {
+    public LocalDate getFecha_compra() {
         return fecha_compra;
     }
 
-    public void setFecha_compra(Date fecha_compra) {
+    public void setFecha_compra(LocalDate fecha_compra) {
         this.fecha_compra = fecha_compra;
+    }
+
+    public void setFecha_compra(Timestamp fecha_compra) {
+        this.fecha_compra = fecha_compra.toLocalDateTime().toLocalDate();
     }
 
     public int getCantidad() {

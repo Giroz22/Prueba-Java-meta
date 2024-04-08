@@ -54,12 +54,12 @@ public class Main {
         do{
             opc = JOptionPane.showInputDialog(null, """
                     Select a option:
-                    1. FindAll
-                    2. FindByID
-                    3. Save
-                    4. Update
-                    5. Delete
-                    6. Back
+                    1. Listar todos
+                    2. Buscar por ID
+                    3. Crear
+                    4. Actualizar
+                    5. Eliminar
+                    6. Volver
                     """);
 
             switch (opc){
